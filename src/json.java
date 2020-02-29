@@ -53,50 +53,72 @@ public class json {
 
             // read file line by line
             String line;
+            String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$"; // email regex
+
+            String lastname = "";
+            String firstname = "";
+            String id = "";
+            String email = "";
 
             while ((line = reader.readLine()) != null) {
                 Map<String, Object> studentMap = new LinkedHashMap<>();
                 JSONArray courseMarksList = new JSONArray();
 
-                String delim = "";
-                if(line.indexOf(":") > -1){ // if line has courses
-                    delim = ":";
-                }else{
-                    delim = ",";
-                }
-                StringTokenizer tokenizer = new StringTokenizer(line, delim);
-                // break up courses first, then break up required fields
-
-                String lastname = "";
-                String firstname = "";
-                String id = "";
-                String email = "";
-
-                boolean first = true;
-                while(tokenizer.hasMoreTokens()){
-                    String token = tokenizer.nextToken();
-                    if(first){ // break up the 3 required fields before courses
-                        String[] reqFields = token.split(",");
-
-                        id = reqFields[0];
-                        lastname = reqFields[1];
-                        firstname = reqFields[2];
-
-                        if(reqFields.length > 3){ // email exists
-                            email = reqFields[3];
+                StringBuilder token = new StringBuilder();
+                int counter = 1;
+                for (int i = 0; i < line.length(); i++) {
+                    while (i < line.length() && line.charAt(i) == ':') { // course/grade pair; comma separates the two
+                        // add previous field
+                        String field = token.toString();
+                        if (field.matches(regex)) { // check for email
+                            //student.setEmail(token.toString());
+                            email = field;
+                            token = new StringBuilder();
+                        } else if (firstname.length() == 0) { // first name
+                            firstname = field;
+                            token = new StringBuilder();
                         }
-                        first = false;
-                    }else{
-                        // courses
+                        // add course/grade pair to list in object
                         Map<String, Object> coursePairMap = new LinkedHashMap<>();
-                        String[] coursePair = token.split(",");
-                        coursePairMap.put("CourseScore", Integer.parseInt(coursePair[1]));
-                        coursePairMap.put("CourseName", coursePair[0]);
+
+                        i++;
+                        while (line.charAt(i) != ',') {
+                            token.append(line.charAt(i));
+                            i++;
+                        }
+                        String courseName = token.toString();
+                        token = new StringBuilder();
+                        i++;
+                        while (i < line.length() && line.charAt(i) != ':') {
+                            token.append(line.charAt(i));
+                            i++;
+                        }
+                        //.out.println(token.toString());
+                        int score = Integer.parseInt(token.toString());
+                        token = new StringBuilder();
+                        coursePairMap.put("CourseName", courseName);
+                        coursePairMap.put("CourseScore", score);
 
                         JSONObject courseMarksObj = new JSONObject(coursePairMap);
                         // add it to coursemarks list
                         courseMarksList.add(courseMarksObj);
-
+                    }
+                    if (i < line.length() && line.charAt(i) == ',') {
+                        String field = token.toString();
+                        if (counter == 1) { // id
+                            id = field;
+                            token = new StringBuilder();
+                        } else if (counter == 2) { // last name
+                            lastname = field;
+                            token = new StringBuilder();
+                            //System.out.println("last name set");
+                        } else if (counter == 3) { // first name
+                            firstname = field;
+                            token = new StringBuilder();
+                        }
+                        counter++; // increment at the end of every column
+                    } else if (i < line.length()) {
+                        token.append(line.charAt(i));
                     }
                 }
                 // make JSON array of students; add student
@@ -109,7 +131,6 @@ public class json {
                 }
 
                 JSONObject studentObj = new JSONObject(studentMap);
-                //System.out.println(studentObj.toString());
                 result.add(studentObj);
             }
 
@@ -206,7 +227,7 @@ public class json {
                 // calculate serialization time
                 long duration = (endTime - startTime)/1000000;
 
-                // calculate size of result.json
+                // calculate size of output_json.txt
                 File file = new File("output_json.txt");
                 long size = file.length(); // fize size in bytes
 

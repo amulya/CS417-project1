@@ -118,8 +118,8 @@ public class proto {
                 // calculate serialization time
                 long duration = (endTime - startTime) / 1000000; // time in ms
 
-                // calculate size of result.json
-                File file = new File("result.json");
+                // calculate size of result_protobuf
+                File file = new File("result_protobuf");
                 long size = file.length(); // fize size in bytes
 
                 returnVal[0] = duration;
@@ -138,7 +138,7 @@ public class proto {
         long[] returnVal = new long[2];
         try {
             //OutputStream outputStream = new FileOutputStream("output_protobuf.txt");
-            FileWriter writer = new FileWriter("output_protobuf.txt", true);
+            FileWriter writer = new FileWriter("output_protobuf.txt");
             InputStream inputStream = new FileInputStream(protobuf_file);
 
             long startTime = System.nanoTime();
@@ -188,8 +188,8 @@ public class proto {
                 // calculate serialization time
                 long duration = (endTime - startTime) / 1000000; // time in ms
 
-                // calculate size of result.json
-                File file = new File("result.json");
+                // calculate size of output_protobuf.txt
+                File file = new File("output_protobuf.txt");
                 long size = file.length(); // fize size in bytes
 
                 returnVal[0] = duration;
