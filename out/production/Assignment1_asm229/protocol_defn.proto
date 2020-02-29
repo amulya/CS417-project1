@@ -1,0 +1,23 @@
+
+syntax = "proto2";
+
+package com.resultproto;
+
+option java_outer_classname = "ResultProto";
+
+message CourseMarks {
+    optional string name = 1;
+    optional int32 score = 2;
+}
+
+message Student {
+    required string id = 1;
+    required string lastname = 2;
+    required string firstname = 3;
+    optional string email = 4;
+    repeated CourseMarks marks = 5;
+}
+
+message Result {
+    repeated Student student = 1;
+}
